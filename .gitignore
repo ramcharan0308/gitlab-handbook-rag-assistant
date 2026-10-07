@@ -1,0 +1,28 @@
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Environment variables & secrets
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Data and Vector Storage
+data/
+chroma_db/
+
+# Documentation drafts & binaries (Full documentation hosted on Google Docs)
+*.docx
+
+# OS generated files
+.DS_Store
+Thumbs.db
