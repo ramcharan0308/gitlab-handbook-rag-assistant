@@ -3,30 +3,29 @@ import sys
 import os
 import random
 from pathlib import Path
+from huggingface_hub import snapshot_download
+
+# ── download chroma_db from Hugging Face if not present ───────────────────
+CHROMA_PATH = Path("chroma_db")
+if not CHROMA_PATH.exists():
+    with st.spinner("🔄 Loading knowledge base... (first time only, ~2 mins)"):
+        snapshot_download(
+            repo_id="ramcharan0308/gitlab-handbook-rag-db",
+            repo_type="dataset",
+            local_dir="chroma_db",
+            token=os.getenv("HF_TOKEN")
+        )
+
+sys.path.insert(0, str(Path(__file__).parent / "src"))
+from rag_engine import ask
 
 # ── page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="GitLab Handbook RAG Assistant",
+    page_title="GitLab Assistant",
     page_icon="🦊",
     layout="centered",
     initial_sidebar_state="collapsed"
 )
-
-# ── check local vector database ──────────────────────────────────────────────
-CHROMA_PATH = Path("chroma_db")
-if not CHROMA_PATH.exists():
-    st.error("⚠️ **Local knowledge base (`chroma_db/`) not found.**")
-    st.info(
-        "Please build the local vector database first by running:\n\n"
-        "```bash\n"
-        "python src/build_vectorstore.py\n"
-        "```\n\n"
-        "This will clone the GitLab Handbook repository, smart-chunk the documentation, and build the local ChromaDB database."
-    )
-    st.stop()
-
-sys.path.insert(0, str(Path(__file__).parent / "src"))
-from rag_engine import ask
 
 GITLAB_FACTS = [
     "🌍 GitLab has team members in 60+ countries — truly all-remote since day one.",
@@ -344,13 +343,10 @@ st.markdown("""
 <div class="gl-header">
     <div class="gl-logo">🦊</div>
     <div>
-        <div class="gl-title">GitLab Handbook RAG Assistant</div>
-        <div class="gl-sub">Handbook · Direction · Culture · Strategy | Maintained by <a href="https://github.com/ramcharan0308" target="_blank" style="color:inherit;text-decoration:underline;">Vadthya Ram Charan</a></div>
+        <div class="gl-title">GitLab Assistant</div>
+        <div class="gl-sub">Handbook · Direction · Culture · Strategy</div>
     </div>
-    <div style="margin-left:auto;display:flex;align-items:center;gap:8px;">
-        <a href="https://github.com/ramcharan0308/gitlab-handbook-rag-assistant" target="_blank" style="font-size:0.75em;color:var(--muted);text-decoration:none;border:1px solid var(--border);border-radius:20px;padding:4px 10px;background:var(--surface);">GitHub</a>
-        <div class="gl-badge">● Online</div>
-    </div>
+    <div class="gl-badge">● Online</div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -367,7 +363,7 @@ if not st.session_state.messages:
     st.markdown("""
     <div class="welcome">
         <div class="w-emoji">🦊</div>
-        <div class="w-title">Hey, I'm your GitLab Handbook RAG Assistant!</div>
+        <div class="w-title">Hey, I'm your GitLab Assistant!</div>
         <div class="w-sub">Ask me anything about GitLab's culture, values,
         hiring, remote work, product strategy, and more.</div>
     </div>
@@ -437,7 +433,7 @@ with col1:
 with col2:
     send_btn = st.button("Send ↑", use_container_width=True)
 st.markdown(
-    "<div class='input-hint'>⏎ Enter to send &nbsp;·&nbsp; ⇧⏎ Shift+Enter for new line &nbsp;·&nbsp; <a href='https://github.com/ramcharan0308/gitlab-handbook-rag-assistant' target='_blank' style='color:var(--muted);text-decoration:none;'>GitLab Handbook RAG Assistant by Vadthya Ram Charan</a></div>",
+    "<div class='input-hint'>⏎ Enter to send &nbsp;·&nbsp; ⇧⏎ Shift+Enter for new line</div>",
     unsafe_allow_html=True)
 st.markdown("</div></div>", unsafe_allow_html=True)
 

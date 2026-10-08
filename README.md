@@ -11,6 +11,10 @@ An enterprise-grade, conversational GenAI assistant engineered to help employees
 - **Email**: [vadthyaramcharan369@gmail.com](mailto:vadthyaramcharan369@gmail.com)  
 - **Repository**: [https://github.com/ramcharan0308/gitlab-handbook-rag-assistant](https://github.com/ramcharan0308/gitlab-handbook-rag-assistant)
 
+## 🌐 Live Demo
+
+🔗 Live Demo: Coming soon
+
 ---
 
 ## 📚 Full Documentation
@@ -54,7 +58,7 @@ flowchart TD
 ## ✨ Core Features & Highlights
 
 - **Hybrid RAG + HyDE**: Combines dense semantic search (`all-MiniLM-L6-v2`) with BM25-style keyword matching and zero-shot hypothetical answer generation for high-precision document retrieval.
-- **Dual-Collection Knowledge Partitioning**: Separates operational handbook policies from forward-looking strategic direction in independent ChromaDB collections.
+- **Dual-Collection Knowledge Partitioning**: Separates operational handbook policies (78,143 chunks) from forward-looking strategic direction (44,000 chunks) across independent ChromaDB collections (122,143 total indexed vectors).
 - **Structure-Aware Smart Chunking**: Parses raw Markdown directly from Git, preserving YAML frontmatter metadata, heading hierarchies, paragraph boundaries, and sentence-level overlaps.
 - **Grounded Generation & Guardrails**: Fact-grounded Gemini prompt engineering at `temperature=0.0` with strict negative constraints and fast rule-based off-topic query deflection.
 - **Automated Multi-Tier Model Fallback**: Resilient fallback ladder (`gemini-2.0-flash-lite` $\rightarrow$ `gemini-2.0-flash` $\rightarrow$ `gemini-2.5-flash`) with automated retry logic to withstand quota limits.
@@ -70,7 +74,8 @@ flowchart TD
 | **Frontend** | Streamlit | Conversational chat UI, theme switcher, and session management |
 | **LLM Inference** | Google Gemini (`2.0 Flash Lite` / `2.0 Flash` / `2.5 Flash`) | Zero-shot HyDE synthesis and grounded answer generation with automatic fallback |
 | **Embeddings** | `sentence-transformers/all-MiniLM-L6-v2` | 384-dimensional local semantic embeddings (zero API cost) |
-| **Vector Database** | ChromaDB (`v1.5.5`) | Embedded persistent vector storage with dual collections (`handbook`, `direction`) |
+| **Vector Database** | ChromaDB (`v1.5.5`) | Embedded persistent vector storage with dual collections (`handbook`: 78,143 chunks, `direction`: 44,000 chunks; 122,143 total chunks) |
+| **Knowledge Base Distribution** | Hugging Face Hub (`huggingface_hub`) | Automated snapshot download of indexed ChromaDB dataset ([ramcharan0308/gitlab-handbook-rag-db](https://huggingface.co/datasets/ramcharan0308/gitlab-handbook-rag-db)) |
 | **Retrieval Strategy** | Hybrid RAG + HyDE | Dense cosine similarity merged with BM25-style keyword matching |
 | **Data Ingestion** | GitPython + BeautifulSoup4 | Shallow Git clone of Handbook + HTML/Markdown processing |
 | **Environment** | `python-dotenv` | Local environment variable management (`.env`) |
@@ -86,7 +91,7 @@ gitlab-handbook-rag-assistant/
 │   └── devcontainer.json           # VS Code & Codespaces DevContainer configuration
 ├── .gitignore                      # Excludes venv, .env, chroma_db, caches, and secrets
 ├── .python-version                 # Pinned Python version ("3.11")
-├── .env.example                    # Environment variable template (GEMINI_API_KEY=)
+├── .env.example                    # Environment variable template (GEMINI_API_KEY=, HF_TOKEN=)
 ├── README.md                       # Portfolio overview and quickstart documentation
 ├── app.py                          # Streamlit interactive application frontend
 ├── requirements.txt                # Pinned project dependencies
@@ -153,37 +158,38 @@ Create a `.env` file in the project root:
 cp .env.example .env
 ```
 
-Open `.env` and enter your Gemini API key:
+Open `.env` and enter your API keys:
 ```env
 GEMINI_API_KEY=your_gemini_api_key_here
+HF_TOKEN=your_huggingface_token_here
 ```
-*(Never commit `.env` to Git; it is strictly excluded by `.gitignore`).*
+*(Note: `HF_TOKEN` is required if accessing a private or gated Hugging Face dataset. Never commit `.env` to Git; it is strictly excluded by `.gitignore`).*
 
 ---
 
-### 5️⃣ Build the Vector Database Locally
-Run the automated pipeline to clone the GitLab Handbook and construct your local ChromaDB collections:
+### 5️⃣ Launch the Application (Automated Hugging Face Download)
+```bash
+streamlit run app.py
+```
+*What happens on first run:*
+- If `chroma_db/` is not found locally, the application automatically downloads the pre-indexed knowledge base (~1.12 GB / 1,199,591,772 bytes containing 122,143 vectors) directly from Hugging Face ([ramcharan0308/gitlab-handbook-rag-db](https://huggingface.co/datasets/ramcharan0308/gitlab-handbook-rag-db)) via `snapshot_download()`.
+- Once downloaded (or if already present), ChromaDB initializes and the interactive Streamlit interface opens at `http://localhost:8501`.
 
+---
+
+### 💡 (Optional) Rebuild Vector Database Locally
+If you prefer to re-index the knowledge base from scratch rather than downloading the pre-built dataset:
 ```bash
 python src/build_vectorstore.py
 ```
-
 *What this script does:*
 1. Clones the official GitLab Handbook (`--depth=1`) into `data/handbook/`.
 2. Parses markdown files and applies smart heading/paragraph chunking with sentence-boundary preservation.
 3. Filters and chunks strategy/direction content.
 4. Generates dense embeddings locally in batches using `all-MiniLM-L6-v2`.
-5. Persists the indexed vectors to the local `chroma_db/` directory.
+5. Persists the indexed vectors into the local `chroma_db/` directory.
 
 *(Takes approximately 15–20 minutes on first execution).*
-
----
-
-### 6️⃣ Launch the Application
-```bash
-streamlit run app.py
-```
-Open your browser to `http://localhost:8501` to start chatting!
 
 ---
 
