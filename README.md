@@ -13,7 +13,7 @@ An enterprise-grade, conversational GenAI assistant engineered to help employees
 
 ## 🌐 Live Demo
 
-🔗 Live Demo: Coming soon
+🔗 [Live Demo](https://handbook-genai-rag-assistant.streamlit.app/)
 
 ---
 
@@ -61,7 +61,7 @@ flowchart TD
 - **Dual-Collection Knowledge Partitioning**: Separates operational handbook policies (78,143 chunks) from forward-looking strategic direction (44,000 chunks) across independent ChromaDB collections (122,143 total indexed vectors).
 - **Structure-Aware Smart Chunking**: Parses raw Markdown directly from Git, preserving YAML frontmatter metadata, heading hierarchies, paragraph boundaries, and sentence-level overlaps.
 - **Grounded Generation & Guardrails**: Fact-grounded Gemini prompt engineering at `temperature=0.0` with strict negative constraints and fast rule-based off-topic query deflection.
-- **Automated Multi-Tier Model Fallback**: Resilient fallback ladder (`gemini-2.0-flash-lite` $\rightarrow$ `gemini-2.0-flash` $\rightarrow$ `gemini-2.5-flash`) with automated retry logic to withstand quota limits.
+- **Automated Multi-Tier Model Fallback**: Resilient fallback ladder (`gemini-3.5-flash-lite` $\rightarrow$ `gemini-3.6-flash` $\rightarrow$ `gemini-2.5-flash`) with automated retry logic to withstand quota limits.
 - **100% Local Embedding Engine**: Runs `all-MiniLM-L6-v2` locally on CPU/GPU, eliminating embedding API fees and rate limits during ingestion.
 - **Modern Streamlit UX**: Interactive chat interface with live theme switching (Light / Dark / Blue), conversation memory, source citation drawers, and dynamic engagement trivia.
 
@@ -72,7 +72,7 @@ flowchart TD
 | Component | Technology | Purpose |
 | :--- | :--- | :--- |
 | **Frontend** | Streamlit | Conversational chat UI, theme switcher, and session management |
-| **LLM Inference** | Google Gemini (`2.0 Flash Lite` / `2.0 Flash` / `2.5 Flash`) | Zero-shot HyDE synthesis and grounded answer generation with automatic fallback |
+| **LLM Inference** | Google Gemini (`3.5 Flash Lite` / `3.6 Flash` / `2.5 Flash`) | Zero-shot HyDE synthesis and grounded answer generation with automatic fallback |
 | **Embeddings** | `sentence-transformers/all-MiniLM-L6-v2` | 384-dimensional local semantic embeddings (zero API cost) |
 | **Vector Database** | ChromaDB (`v1.5.5`) | Embedded persistent vector storage with dual collections (`handbook`: 78,143 chunks, `direction`: 44,000 chunks; 122,143 total chunks) |
 | **Knowledge Base Distribution** | Hugging Face Hub (`huggingface_hub`) | Automated snapshot download of indexed ChromaDB dataset ([ramcharan0308/gitlab-handbook-rag-db](https://huggingface.co/datasets/ramcharan0308/gitlab-handbook-rag-db)) |

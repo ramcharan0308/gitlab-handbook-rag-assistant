@@ -32,8 +32,8 @@ direction_collection = chroma_client.get_collection("direction")
 
 # ── model list with fallbacks ──────────────────────────────────────────────
 MODELS = [
-    'gemini-2.0-flash-lite',
-    'gemini-2.0-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-3.6-flash',
     'gemini-2.5-flash',
 ]
 
@@ -51,6 +51,7 @@ def generate_with_fallback(prompt: str, temperature: float = 0.0,
                         max_output_tokens=max_tokens
                     )
                 )
+                print(f"✅ {model_name} worked!")
                 return response.text.strip()
             except Exception as e:
                 err = str(e)
@@ -104,15 +105,14 @@ def generate_hypothetical_answer(question: str) -> str:
     HyDE: Generate a hypothetical ideal answer to improve retrieval.
     We embed this instead of the raw question.
     """
-    prompt = f"""You are a GitLab expert. Write a short paragraph (3-4 sentences) 
-that would be the ideal answer to this question, as if it came directly 
-from the GitLab Handbook or Direction pages.
+    prompt = f"""You are a GitLab expert. Write a concise 1-2 sentence hypothetical answer
+to this question using likely GitLab terminology and concepts.
 
 Question: {question}
 
 Write only the answer paragraph, no preamble."""
 
-    return generate_with_fallback(prompt, temperature=0.1, max_tokens=200)
+    return generate_with_fallback(prompt, temperature=0.1, max_tokens=100)
 
 # ── BM25 keyword search ────────────────────────────────────────────────────
 def bm25_search(query: str, collection, n_results: int = 5):
@@ -252,7 +252,7 @@ def ask(question: str, chat_history: list = []) -> dict:
     # step 2 — hybrid search both collections
     print("🔍 Searching handbook + direction...")
     handbook_chunks  = hybrid_search(
-        question, hyde_answer, handbook_collection,  "handbook",  n_results=15
+        question, hyde_answer, handbook_collection,  "handbook",  n_results=8
     )
     direction_chunks = hybrid_search(
         question, hyde_answer, direction_collection, "direction", n_results=8
@@ -319,7 +319,7 @@ Question: {question}
 Answer:"""
 
     print("💬 Generating answer with Gemini...")
-    answer = generate_with_fallback(prompt, temperature=0.0, max_tokens=2000)
+    answer = generate_with_fallback(prompt, temperature=0.0, max_tokens=1200)
 
     # step 8 — build sources
     sources   = []
